@@ -3,8 +3,6 @@ from app.api.v1.endpoints import wallet
 from app.core.db import init_db
 
 
-
-
 app = FastAPI()
 
 app.include_router(wallet.router, prefix="/api/v1")
