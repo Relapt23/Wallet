@@ -1,0 +1,5 @@
+pytest-asyncio
+httpx
+pytest
+aiosqlite
+greenlet
