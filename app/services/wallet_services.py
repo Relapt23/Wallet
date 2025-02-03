@@ -5,7 +5,7 @@ from fastapi import status, HTTPException
 from uuid import UUID
 
 
-async def deposit(wallet_uuid: UUID, amount:int, session: AsyncSession) -> int:
+async def deposit(wallet_uuid: UUID, amount: int, session: AsyncSession) -> int:
     response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid))
     wallet = response.scalar_one_or_none()
     if not wallet:
@@ -20,6 +20,7 @@ async def deposit(wallet_uuid: UUID, amount:int, session: AsyncSession) -> int:
         await session.commit()
         await session.refresh(wallet)
         return wallet.balance
+
 
 async def withdraw(wallet_uuid: UUID, amount: int, session: AsyncSession) -> int:
     response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid))
@@ -45,4 +46,3 @@ async def get_balance(wallet_uuid: UUID, session: AsyncSession):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wallet not found")
 
     return wallet.balance
-

@@ -4,8 +4,8 @@ from app.services.wallet_services import deposit, withdraw, get_balance
 from app.core.db import sess
 from sqlalchemy.ext.asyncio import AsyncSession
 
-
 router = APIRouter()
+
 
 async def get_session():
     async with sess() as session:
@@ -20,6 +20,7 @@ async def change_balance(wallet_uuid: UUID, operation: WalletOperation, session:
         new_balance = await withdraw(wallet_uuid, operation.amount, session)
 
     return WalletResponse(wallet_uuid=wallet_uuid, balance=new_balance)
+
 
 @router.get("/wallets/{wallet_uuid}", response_model=WalletResponse)
 async def wallet_balance(wallet_uuid: UUID, session: AsyncSession = Depends(get_session)):

@@ -16,7 +16,8 @@ async def test_engine():
     yield engine
     await engine.dispose()
 
-@ pytest.fixture(scope="session")
+
+@pytest.fixture(scope="session")
 async def run_before_and_after_tests(test_engine):
     async_session = async_sessionmaker(bind=test_engine, expire_on_commit=False, autocommit=False, autoflush=False)
 
@@ -34,13 +35,12 @@ async def client(run_before_and_after_tests):
         yield client
 
 
-
 @pytest.mark.asyncio
 async def test_deposit_to_new_wallet(client):
     test_uuid = uuid4()
     response = await client.post(
-            f"/api/v1/wallets/{test_uuid}/operation",
-            json={"operationType": "DEPOSIT", "amount": 1000},
+        f"/api/v1/wallets/{test_uuid}/operation",
+        json={"operationType": "DEPOSIT", "amount": 1000},
     )
     assert response.status_code == 200
     data = response.json()
@@ -52,13 +52,13 @@ async def test_deposit_to_new_wallet(client):
 async def test_withdraw_to_new_wallet(client):
     test_uuid = uuid4()
     await client.post(
-            f"/api/v1/wallets/{test_uuid}/operation",
-            json={"operationType": "DEPOSIT", "amount": 1000},
+        f"/api/v1/wallets/{test_uuid}/operation",
+        json={"operationType": "DEPOSIT", "amount": 1000},
     )
 
     response = await client.post(
-            f"/api/v1/wallets/{test_uuid}/operation",
-            json={"operationType": "WITHDRAW", "amount": 500},
+        f"/api/v1/wallets/{test_uuid}/operation",
+        json={"operationType": "WITHDRAW", "amount": 500},
     )
     assert response.status_code == 200
     data = response.json()
@@ -70,13 +70,11 @@ async def test_withdraw_to_new_wallet(client):
 async def test_get_balance(client):
     test_uuid = uuid4()
 
-
     deposit_response = await client.post(
         f"/api/v1/wallets/{test_uuid}/operation",
         json={"operationType": "DEPOSIT", "amount": 2000},
     )
     assert deposit_response.status_code == 200
-
 
     response = await client.get(f"/api/v1/wallets/{test_uuid}")
     assert response.status_code == 200
@@ -89,17 +87,18 @@ async def test_get_balance(client):
 async def test_insufficient_funds(client):
     test_uuid = uuid4()
     await client.post(
-            f"/api/v1/wallets/{test_uuid}/operation",
-            json={"operationType": "DEPOSIT", "amount": 1500},
+        f"/api/v1/wallets/{test_uuid}/operation",
+        json={"operationType": "DEPOSIT", "amount": 1500},
     )
 
     response = await client.post(
-            f"/api/v1/wallets/{test_uuid}/operation",
-            json={"operationType": "WITHDRAW", "amount": 2000},
+        f"/api/v1/wallets/{test_uuid}/operation",
+        json={"operationType": "WITHDRAW", "amount": 2000},
     )
     assert response.status_code == 400
     data = response.json()
     assert data["detail"] == "Insufficient funds"
+
 
 @pytest.mark.asyncio
 async def test_wallet_not_found(client):
@@ -108,4 +107,3 @@ async def test_wallet_not_found(client):
     assert response.status_code == 404
     data = response.json()
     assert data["detail"] == "Wallet not found"
-
