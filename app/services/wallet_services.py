@@ -3,10 +3,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import status, HTTPException
 from uuid import UUID
+from decimal import Decimal
 
 
-async def deposit(wallet_uuid: UUID, amount: int, session: AsyncSession) -> int:
-    response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid))
+async def deposit(wallet_uuid: UUID, amount: Decimal, session: AsyncSession) -> Decimal:
+    response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid).with_for_update())
     wallet = response.scalar_one_or_none()
     if not wallet:
         wallet = Wallet(wallet_uuid=wallet_uuid, balance=amount)
@@ -22,8 +23,8 @@ async def deposit(wallet_uuid: UUID, amount: int, session: AsyncSession) -> int:
         return wallet.balance
 
 
-async def withdraw(wallet_uuid: UUID, amount: int, session: AsyncSession) -> int:
-    response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid))
+async def withdraw(wallet_uuid: UUID, amount: Decimal, session: AsyncSession) -> Decimal:
+    response = await session.execute(select(Wallet).where(Wallet.wallet_uuid == wallet_uuid).with_for_update())
     wallet = response.scalar_one_or_none()
     if not wallet:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Wallet not found")
